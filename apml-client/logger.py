@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: logger.py
-# Date: Sat Jun 06 16:32:29 2015 +0800
+# Date: Sat Jun 06 17:01:31 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -22,7 +22,7 @@ class EventLogger(object):
 
     def add_package(self, pack):
         self.packages.append(pack)
-        if len(self.packages) > self.saved_nr_package + INCREMENT_SAVE_INTERVAL:
+        if len(self.packages) >= self.saved_nr_package + INCREMENT_SAVE_INTERVAL:
             self.save_snapshot()
 
     def load_snapshot(self):
@@ -44,7 +44,6 @@ class EventLogger(object):
         for f in hists:
             os.unlink(f)
         self.saved_nr_package = len(self.packages)
-
 
     def get_hist_file(self, all=False):
         files = os.listdir(LOG_DIR)

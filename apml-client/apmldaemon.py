@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: apmldaemon.py
-# Date: Sat Jun 06 16:35:58 2015 +0800
+# Date: Sat Jun 06 17:02:21 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import platform
@@ -41,7 +41,6 @@ class APMLDaemon(object):
         while True:
             tp, time, window = self.q.get()
             last_time = self.packer.start
-            print time, last_time
             if last_time is not None \
                and time - last_time > COLLECT_INTERVAL:
                 self.pack()

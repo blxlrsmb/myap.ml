@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: linux.py
-# Date: Sat Jun 06 15:18:07 2015 +0800
+# Date: Sat Jun 06 16:53:30 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 from .base import APMCollectorBase
@@ -45,7 +45,11 @@ class LinuxAPMCollector(APMCollectorBase):
                             shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = p.stdout.readlines()
-        return out[0].split('=')[-1].split(',')[-1][2:-2]
+        try:
+            return out[0].split('=')[-1].split(',')[-1][2:-2]
+        except:
+            # on desktop
+            return ""
 
 if __name__ == '__main__':
     coll = LinuxAPMCollector(10)
