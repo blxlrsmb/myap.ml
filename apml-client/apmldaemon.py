@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: apmldaemon.py
-# Date: Sat Jun 06 17:19:54 2015 +0800
+# Date: Sat Jun 06 17:25:32 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import platform
@@ -16,12 +16,12 @@ from logger import EventLogger
 import logging
 logger = logging.getLogger(__name__)
 
-TYPE_KEY = 0
-TYPE_MOUSE = 1
-
 COLLECT_INTERVAL = 5
 
 class APMLDaemon(object):
+    TYPE_KEY = 0
+    TYPE_MOUSE = 1
+
     def __init__(self):
         self.packer = EventPacker()
         system = platform.system()
@@ -42,14 +42,16 @@ class APMLDaemon(object):
         self.logger = EventLogger()
 
     def start(self):
-        self.coll.spawn()
+        self.coll.spawn()   # start collector
+
         while True:
+            # process events
             tp, time, window = self.q.get()
             last_time = self.packer.start
             if last_time is not None \
                and time - last_time > COLLECT_INTERVAL:
                 self.pack()
-            if tp == TYPE_KEY:
+            if tp == self.TYPE_KEY:
                 self.packer.add_key(time, window)
             else:
                 self.packer.add_mouse(time, window)
@@ -63,10 +65,10 @@ class APMLDaemon(object):
         self.logger.add_package(dump)
 
     def on_key(self, time, window):
-        self.q.put((TYPE_KEY, time, window))
+        self.q.put((self.TYPE_KEY, time, window))
 
     def on_mouse(self, time, window):
-        self.q.put((TYPE_MOUSE, time, window))
+        self.q.put((self.TYPE_MOUSE, time, window))
 
 if __name__ == '__main__':
     d = APMLDaemon()
