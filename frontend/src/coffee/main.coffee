@@ -1,9 +1,15 @@
 $ ->
   server = 'http://api.myap.ml'
-  jsonPath = 'summary'
+  # id = location.search.match(/[^=]+$/)[0]
   width = Math.min window.innerWidth, 1280
 
-  d3.json "#{server}/summary", (err, data) ->
+  match = location.search.match /[^=]+$/
+  if match
+    id = match[0]
+  else
+    id = 233
+
+  d3.json "#{server}/summary/#{id}", (err, data) ->
     data = $.map data.data, (d, k) ->
       s = {}
       s.category = k
