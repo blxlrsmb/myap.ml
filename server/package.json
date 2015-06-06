@@ -1,0 +1,15 @@
+{
+  "name": "myap.ml",
+  "private": true,
+  "description": "",
+  "main": "index.coffee",
+  "scripts": {
+    "start": "supervisor -x coffee index.coffee",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "coffee-script": "",
+    "restify": "",
+    "supervisor": ""
+  }
+}
