@@ -53,15 +53,17 @@ rpcCall = (tag, payload, sendResponse) ->
     if payload.request.match /[^0-9a-z]/i
       sendResponse 'only letters and digits allowed'
     else
-      Q.ninvoke redisConnection, 'hset', 'login', request.fromUser, payload.request
+      Q.ninvoke redisConnection, 'hset', 'login', payload.fromUser, payload.request
       sendResponse 'OK'
   else if tag == 'summary'
-    Q.ninvoke redisConnection, 'hget', 'login', request.fromUser
+    Q.ninvoke redisConnection, 'hget', 'login', payload.fromUser
     .then (id) ->
+      logger.debug id
       if not id
         sendResponse 'please login first'
       else
         sendResponse "http://myap.ml/?id=#{id}"
+    .done()
   else
     sendResponse "invalid tag #{tag}"
 
@@ -85,11 +87,11 @@ rpcHandler = (req, res, next) ->
       next()
     content = parsed.xml['Content'][0]
     separatorIndex = content.indexOf ' '
-    if separatorIndex < 1
-      logger.debug 'hh'
+    if separatorIndex == 0
       sendResponse 'invalid request'
     else
-      logger.debug 'hc'
+      if separatorIndex == -1
+        separatorIndex = content.length
       tag = content[..separatorIndex - 1]
       request = content[separatorIndex + 1..]
       payload =
