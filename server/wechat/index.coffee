@@ -2,8 +2,11 @@ crypto = require 'crypto'
 xml2js = require 'xml2js'
 Q = require 'q'
 utils = require '../utils'
+database = require '../database'
 
 logger = utils.logging.newConsoleLogger module.filename
+
+redisConnection = database.getConnection()
 
 authenticationHandler = (req, res, next) ->
   token = 'EastIndiaCompany'
@@ -44,8 +47,21 @@ echoHandler = (req, res, next) ->
   .done()
 
 rpcCall = (tag, payload, sendResponse) ->
-  if tag == 'GET'
+  if tag == 'echo'
     sendResponse "echo #{payload.request}"
+  else if tag == 'login'
+    if payload.request.match /[^0-9a-z]/i
+      sendResponse 'only letters and digits allowed'
+    else
+      Q.ninvoke redisConnection, 'hset', 'login', request.fromUser, payload.request
+      sendResponse 'OK'
+  else if tag == 'summary'
+    Q.ninvoke redisConnection, 'hget', 'login', request.fromUser
+    .then (id) ->
+      if not id
+        sendResponse 'please login first'
+      else
+        sendResponse "http://myap.ml/?id=#{id}"
   else
     sendResponse "invalid tag #{tag}"
 
@@ -53,14 +69,14 @@ rpcHandler = (req, res, next) ->
   console.dir req.body
   Q.ninvoke xml2js, 'parseString', req.body
   .then (parsed) ->
-    toUser = parsed.xml['FromUserName'][0]
-    fromUser = parsed.xml['ToUserName'][0]
+    fromUser = parsed.xml['FromUserName'][0]
+    toUser = parsed.xml['ToUserName'][0]
     createTime = (new Date()).getTime() // 1000
     sendResponse = (content) ->
       ret = "
         <xml>
-          <ToUserName><![CDATA[#{toUser}]]></ToUserName>
-          <FromUserName><![CDATA[#{fromUser}]]></FromUserName>
+          <ToUserName><![CDATA[#{fromUser}]]></ToUserName>
+          <FromUserName><![CDATA[#{toUser}]]></FromUserName>
           <CreateTime>#{createTime}</CreateTime>
           <MsgType><![CDATA[text]]></MsgType>
           <Content><![CDATA[#{content}]]></Content>
@@ -77,8 +93,8 @@ rpcHandler = (req, res, next) ->
       tag = content[..separatorIndex - 1]
       request = content[separatorIndex + 1..]
       payload =
-        toUser: fromUser
-        fromUser: toUser
+        toUser: toUser
+        fromUser: fromUser
         createTime: createTime
         request: request
       rpcCall tag, payload, sendResponse
