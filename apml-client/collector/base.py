@@ -1,13 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: base.py
-# Date: Sat Jun 06 14:57:27 2015 +0800
+# Date: Sat Jun 06 15:16:49 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 from abc import ABCMeta, abstractmethod
 import logging
 logger = logging.getLogger(__name__)
 import threading
+import time
 
 class APMCollectorBase(object):
     __metaclass__ = ABCMeta
@@ -20,11 +21,11 @@ class APMCollectorBase(object):
     def spawn(self):
         logger.info("Starting Collector...")
         self.keyboard_th = threading.Thread(
-            target=self._collect_key, args=())
+            target=self.collect_key, args=())
         self.keyboard_th.start()
 
         self.mouse_th = threading.Thread(
-            target=self._collect_mouse, args=())
+            target=self.collect_mouse, args=())
         self.mouse_th.start()
 
     def set_event_cb(self, keyboard_cb, mouse_cb):
@@ -32,12 +33,14 @@ class APMCollectorBase(object):
         self._mouse_cb = mouse_cb
 
     def on_key(self):
+        t = time.time()
         window = self._get_current_window()
-        self._keyboard_cb(window)
+        self._keyboard_cb(t, window)
 
     def on_mouse(self):
+        t = time.time()
         window = self._get_current_window()
-        self._mouse_cb(window)
+        self._mouse_cb(t, window)
 
     def stop(self):
         self.stopped = True
@@ -49,6 +52,14 @@ class APMCollectorBase(object):
     def __del__(self):
         if not self.stopped:
             self.stop()
+
+    def collect_key(self):
+        logger.info("Collecting key events...")
+        self._collect_key()
+
+    def collect_mouse(self):
+        logger.info("Collecting mouse events...")
+        self._collect_mouse()
 
     @abstractmethod
     def _collect_key(self):

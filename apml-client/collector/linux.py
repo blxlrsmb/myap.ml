@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: linux.py
-# Date: Sat Jun 06 15:00:58 2015 +0800
+# Date: Sat Jun 06 15:18:07 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 from .base import APMCollectorBase
@@ -19,7 +19,7 @@ class LinuxAPMCollector(APMCollectorBase):
     def _collect_key(self):
         proc = subprocess.Popen(
             ["xinput", "test", str(self.kb_device)],
-            stdout=subprocess.PIPE)
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = proc.stdout
         while not self.stopped:
             line = stdout.readline()
@@ -31,7 +31,7 @@ class LinuxAPMCollector(APMCollectorBase):
     def _collect_mouse(self):
         proc = subprocess.Popen(
             ["xinput", "test", str(self.mo_device)],
-            stdout=subprocess.PIPE)
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = proc.stdout
         while not self.stopped:
             line = stdout.readline()
@@ -42,7 +42,8 @@ class LinuxAPMCollector(APMCollectorBase):
 
     def _get_current_window(self):
         p = subprocess.Popen("xprop -id $(xdotool getactivewindow) | grep 'WM_CLASS'",
-                            shell=True, stdout=subprocess.PIPE)
+                            shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = p.stdout.readlines()
         return out[0].split('=')[-1].split(',')[-1][2:-2]
 
