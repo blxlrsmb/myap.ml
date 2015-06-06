@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "coffee-script": "",
+    "hiredis": "",
+    "q": "",
+    "redis": "",
     "restify": "",
     "supervisor": "",
-    "redis": "",
-    "hiredis": "",
     "winston": ""
   }
 }
