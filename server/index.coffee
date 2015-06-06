@@ -1,13 +1,12 @@
 restify = require 'restify'
-redis = require 'redis'
 Q = require 'q'
 utils = require './utils'
 wechat = require './wechat'
+database = require './database'
 
 logger = utils.logging.newConsoleLogger module.filename
 
-redisConnection = redis.createClient
-  parser: 'hiredis'
+redisConnection = database.getConnection()
 
 checkIdExistence = (id) ->
   Q.ninvoke redisConnection, 'get', "event:#{id}"
