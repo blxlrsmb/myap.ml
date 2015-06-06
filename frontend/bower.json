@@ -1,0 +1,15 @@
+{
+  "name": "myap.ml",
+  "version": "0.0.1",
+  "main": "",
+  "dependencies": {
+    "d3": "*",
+    "d3-tip": "*",
+    "jquery": "*",
+    "randomcolor": "*"
+  },
+  "ignore": [
+    "bower_components",
+    "build"
+  ]
+}

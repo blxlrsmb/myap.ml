@@ -1,0 +1,6 @@
+*.pem
+node_modules
+build
+bower_components
+config.coffee
+data

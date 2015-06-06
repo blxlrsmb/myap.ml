@@ -1,0 +1,22 @@
+{
+  "name": "myap.ml",
+  "version": "0.0.1",
+  "main" : "Gruntfile.coffee",
+  "dependencies" : {
+  },
+  "devDependencies": {
+    "coffee-script": "*",
+    "jade": "*",
+    "stylus": "*",
+    "grunt": "*",
+    "grunt-contrib-coffee": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-stylus": "*",
+    "grunt-contrib-jade": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-connect": "*"
+  }
+}
