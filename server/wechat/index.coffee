@@ -43,11 +43,11 @@ echoHandler = (req, res, next) ->
     next()
   .done()
 
-rpcCall = (tag, payload, sendReponse) ->
+rpcCall = (tag, payload, sendResponse) ->
   if tag == 'GET'
-    sendReponse "echo #{payload.request}"
+    sendResponse "echo #{payload.request}"
   else
-    sendReponse "invalid tag #{tag}"
+    sendResponse "invalid tag #{tag}"
 
 rpcHandler = (req, res, next) ->
   console.dir req.body
@@ -67,19 +67,21 @@ rpcHandler = (req, res, next) ->
         </xml>"
       res.send 200, ret
       next()
-    content parsed.xml['Content'][0]
+    content = parsed.xml['Content'][0]
     separatorIndex = content.indexOf ' '
     if separatorIndex < 1
+      logger.debug 'hh'
       sendResponse 'invalid request'
     else
+      logger.debug 'hc'
       tag = content[..separatorIndex - 1]
       request = content[separatorIndex + 1..]
       payload =
-        toUser: toUser
-        fromUser: fromUser
+        toUser: fromUser
+        fromUser: toUser
         createTime: createTime
         request: request
-      rpcCall tag, payload, sendReponse
+      rpcCall tag, payload, sendResponse
   .done()
 
 exports.authenticationHandler = authenticationHandler
