@@ -15,6 +15,7 @@
     "restify": "",
     "supervisor": "",
     "winston": "",
-    "xml2js": ""
+    "xml2js": "",
+    "lodash": ""
   }
 }
