@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: linux.py
-# Date: Sat Jun 06 16:53:30 2015 +0800
+# Date: Sun Jun 07 00:22:01 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 from .base import APMCollectorBase
@@ -16,6 +16,8 @@ class LinuxAPMCollector(APMCollectorBase):
         self.kb_device = int(key_xinput_devices[0])
         self.mo_device = int(mouse_xinput_devices[0])
 
+        self.last_key = None
+
     def _collect_key(self):
         proc = subprocess.Popen(
             ["xinput", "test", str(self.kb_device)],
@@ -25,8 +27,12 @@ class LinuxAPMCollector(APMCollectorBase):
             line = stdout.readline()
             if not line:
                 break
-            if line[4] == 'p':  # press
-                self.on_key()
+            if line[4] == 'p':  # key press
+                key = int(line.strip().split(' ')[-1])
+                # holding a key doesn't count APM
+                if key != self.last_key:
+                    self.on_key()
+                self.last_key = key
 
     def _collect_mouse(self):
         proc = subprocess.Popen(

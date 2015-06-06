@@ -1,17 +1,21 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: apmldaemon.py
-# Date: Sat Jun 06 17:25:32 2015 +0800
+# Date: Sat Jun 06 23:50:28 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import platform
+
+from Queue import Empty as EmptyException
 from multiprocessing import Queue
+import time
 
 from config import config
 from utils import logconf
 from collector.linux import LinuxAPMCollector
 from pack import EventPacker
 from logger import EventLogger
+from player import SpeedController
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,6 +38,9 @@ class APMLDaemon(object):
             self.coll = LinuxAPMCollector(key_devices, mouse_devices)
         else:
             raise NotImplementedError()
+
+        self.music = SpeedController()
+
         self.coll.set_event_cb(
             self.on_key,
             self.on_mouse)
@@ -46,19 +53,28 @@ class APMLDaemon(object):
 
         while True:
             # process events
-            tp, time, window = self.q.get()
+            tp = None
+            try:
+                tp, t, window = self.q.get(timeout=COLLECT_INTERVAL)
+            except EmptyException:
+                self.music.zero_speed()
+                t = time.time()
             last_time = self.packer.start
             if last_time is not None \
-               and time - last_time > COLLECT_INTERVAL:
+               and t - last_time > COLLECT_INTERVAL:
                 self.pack()
+            if tp is None:
+                continue
+            self.music.on_event()
             if tp == self.TYPE_KEY:
-                self.packer.add_key(time, window)
+                self.packer.add_key(t, window)
             else:
-                self.packer.add_mouse(time, window)
+                self.packer.add_mouse(t, window)
 
     def pack(self):
         dump = self.packer.dump()
         cnt = self.packer.count()
+
         assert cnt
         logger.info("Pack a package of {} events".format(cnt))
         self.packer = EventPacker()

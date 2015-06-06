@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: base.py
-# Date: Sat Jun 06 15:16:49 2015 +0800
+# Date: Sat Jun 06 20:06:12 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 from abc import ABCMeta, abstractmethod
@@ -56,10 +56,12 @@ class APMCollectorBase(object):
     def collect_key(self):
         logger.info("Collecting key events...")
         self._collect_key()
+        logger.info("Stop collecting key events.")
 
     def collect_mouse(self):
         logger.info("Collecting mouse events...")
         self._collect_mouse()
+        logger.info("Stop collecting mouse events.")
 
     @abstractmethod
     def _collect_key(self):

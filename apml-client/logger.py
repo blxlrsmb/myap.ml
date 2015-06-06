@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: logger.py
-# Date: Sat Jun 06 17:40:14 2015 +0800
+# Date: Sat Jun 06 21:39:13 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -10,18 +10,39 @@ import time
 import logging
 import json
 logger = logging.getLogger(__name__)
+import requests
 
 from config import config
 LOG_DIR = os.path.join(os.path.dirname(__file__),
                        config.get('client', 'log_dir'))
 INCREMENT_SAVE_INTERVAL = config.getint('client', 'save_interval')
 
-MAX_NR_PACKAGE_SEND = 10
+MAX_NR_PACKAGE_SEND = 20
+REQUEST_TIMEOUT = 1
 
 class RemoteSyncing(object):
+    def __init__(self):
+        self.baseurl = config.get('server', 'host')
+        self.userid = config.get('server', 'userid')
+        self.password = config.get('server', 'password')
+        self.url = "http://{}/client/{}".format(self.baseurl, self.userid)
+        logger.info("Use server url: {}".format(self.url))
+
+        self.req_header = {'Content-Type': 'application/json'}
+
     def send(self, packages):
-        data = json.dumps(packages)
-        return True
+        data = json.dumps({
+                'password': self.password,
+                'data': packages })
+        try:
+            r = requests.request('POST', self.url, data=data,
+                headers=self.req_header, timeout=REQUEST_TIMEOUT)
+            if r.status_code == 200:
+                logger.info("Successfully sync to server.")
+                return True
+        except Exception as e:
+            logger.error("Error sync to server: {}".format(e))
+        return False
 
 class EventLogger(object):
     def __init__(self):
@@ -29,7 +50,7 @@ class EventLogger(object):
             os.mkdir(LOG_DIR)
         self.last_synced_timestamp = 0
         self.last_synced_pkgidx = 0
-        self.sender = RemoteSyncing()
+        self.sync = RemoteSyncing()
 
         self.load_snapshot()
         self.update_synced_pkgidx()
@@ -40,7 +61,9 @@ class EventLogger(object):
             to_send = self.packages[self.last_synced_pkgidx:
                                     self.last_synced_pkgidx + MAX_NR_PACKAGE_SEND]
             len_to_send = len(to_send)
-            succ = self.sender.send(to_send)
+            if not len_to_send:
+                break
+            succ = self.sync.send(to_send)
             if succ:
                 logger.info("Successfully synced {} packages.".format(len_to_send))
                 self.last_synced_pkgidx += len_to_send
@@ -59,16 +82,17 @@ class EventLogger(object):
         self.packages.append(pack)
         if len(self.packages) >= self.saved_nr_package + INCREMENT_SAVE_INTERVAL:
             self.save_snapshot()
+        self.try_send()
 
     def load_snapshot(self):
         f = self.get_hist_file()
         if f is None:
             self.packages = []
         else:
-            logger.info("Load snapshot data from {} ...".format(f))
             obj = pickle.load(open(f))
             self.packages = obj['packages']
             self.last_synced_timestamp = obj.get('last_synced_timestamp', 0)
+            logger.info("Loaded {} packages from {}.".format(len(self.packages), f))
         self.saved_nr_package = len(self.packages)
 
     def save_snapshot(self):
