@@ -1,12 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: apmldaemon.py
-# Date: Sat Jun 06 17:02:21 2015 +0800
+# Date: Sat Jun 06 17:19:54 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import platform
 from multiprocessing import Queue
 
+from config import config
 from utils import logconf
 from collector.linux import LinuxAPMCollector
 from pack import EventPacker
@@ -26,7 +27,11 @@ class APMLDaemon(object):
         system = platform.system()
         if system == 'Linux':
             # XXX TODO automatically determine device number
-            self.coll = LinuxAPMCollector([10], [13])
+            key_devices = map(int, config.get('client',
+                                              'linux_key_device').split(','))
+            mouse_devices = map(int, config.get('client',
+                                              'linux_mouse_device').split(','))
+            self.coll = LinuxAPMCollector(key_devices, mouse_devices)
         else:
             raise NotImplementedError()
         self.coll.set_event_cb(

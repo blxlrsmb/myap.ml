@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: logger.py
-# Date: Sat Jun 06 17:01:31 2015 +0800
+# Date: Sat Jun 06 17:21:33 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -10,9 +10,10 @@ import time
 import logging
 logger = logging.getLogger(__name__)
 
+from config import config
 LOG_DIR = os.path.join(os.path.dirname(__file__),
-                       'logs')
-INCREMENT_SAVE_INTERVAL = 2
+                       config.get('client', 'log_dir'))
+INCREMENT_SAVE_INTERVAL = config.getint('client', 'save_interval')
 
 class EventLogger(object):
     def __init__(self):
@@ -57,4 +58,3 @@ class EventLogger(object):
                 return os.path.join(LOG_DIR, files[-1])
             else:
                 return [os.path.join(LOG_DIR, f) for f in files]
-
