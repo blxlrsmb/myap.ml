@@ -43,6 +43,46 @@ echoHandler = (req, res, next) ->
     next()
   .done()
 
+rpcCall = (tag, payload, sendReponse) ->
+  if tag == 'GET'
+    sendReponse "echo #{payload.request}"
+  else
+    sendReponse "invalid tag #{tag}"
+
+rpcHandler = (req, res, next) ->
+  console.dir req.body
+  Q.ninvoke xml2js, 'parseString', req.body
+  .then (parsed) ->
+    toUser = parsed.xml['FromUserName'][0]
+    fromUser = parsed.xml['ToUserName'][0]
+    createTime = (new Date()).getTime() // 1000
+    sendResponse = (content) ->
+      ret = "
+        <xml>
+          <ToUserName><![CDATA[#{toUser}]]></ToUserName>
+          <FromUserName><![CDATA[#{fromUser}]]></FromUserName>
+          <CreateTime>#{createTime}</CreateTime>
+          <MsgType><![CDATA[text]]></MsgType>
+          <Content><![CDATA[#{content}]]></Content>
+        </xml>"
+      res.send 200, ret
+      next()
+    content parsed.xml['Content'][0]
+    separatorIndex = content.indexOf ' '
+    if separatorIndex < 1
+      sendResponse 'invalid request'
+    else
+      tag = content[..separatorIndex - 1]
+      request = content[separatorIndex + 1..]
+      payload =
+        toUser: toUser
+        fromUser: fromUser
+        createTime: createTime
+        request: request
+      rpcCall tag, payload, sendReponse
+  .done()
+
 exports.authenticationHandler = authenticationHandler
 exports.echoHandler = echoHandler
+exports.rpcHandler = rpcHandler
 

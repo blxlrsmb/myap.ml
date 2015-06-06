@@ -120,7 +120,8 @@ summaryHandler = (req, res, next) ->
               count: cnt
             startIndex = -1
             lastValidIndex = -1
-    res.json ret
+    res.json
+      data: ret
   .done()
 
 server = restify.createServer()
@@ -130,7 +131,7 @@ server.use restify.bodyParser
   mapParams: false
   # overrideParams: false
 server.get '/wechat', wechat.authenticationHandler
-server.post '/wechat', wechat.echoHandler
+server.post '/wechat', wechat.rpcHandler
 server.get '/client/:id', getLastTimestampHandler
 server.post '/client/:id', recordHandler
 server.get '/summary', summaryHandler
