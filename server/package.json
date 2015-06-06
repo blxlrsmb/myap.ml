@@ -10,6 +10,9 @@
   "dependencies": {
     "coffee-script": "",
     "restify": "",
-    "supervisor": ""
+    "supervisor": "",
+    "redis": "",
+    "hiredis": "",
+    "winston": ""
   }
 }
