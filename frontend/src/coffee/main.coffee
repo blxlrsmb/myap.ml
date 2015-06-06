@@ -1,9 +1,9 @@
 $ ->
-  server = 'http://25.0.0.213:8080/'
+  server = 'http://api.myap.ml'
   jsonPath = 'summary'
   width = Math.min window.innerWidth, 1280
 
-  d3.json '/data/summary.json', (err, data) ->
+  d3.json "#{server}/summary", (err, data) ->
     data = $.map data.data, (d, k) ->
       s = {}
       s.category = k

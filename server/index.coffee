@@ -126,6 +126,7 @@ summaryHandler = (req, res, next) ->
 
 server = restify.createServer()
 server.use restify.acceptParser(server.acceptable)
+server.use restify.CORS()
 server.use restify.queryParser()
 server.use restify.bodyParser
   mapParams: false
