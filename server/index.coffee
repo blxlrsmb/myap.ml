@@ -61,7 +61,7 @@ recordHandler = (req, res, next) ->
 
 summaryHandler = (req, res, next) ->
   globalStart = 1433590000
-  globalEnd = 1433600000
+  globalEnd = 1433900000
   id = req.params.id
   interval = 5
   consecutive = 3
