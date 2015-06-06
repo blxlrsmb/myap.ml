@@ -9,12 +9,12 @@ redisConnection = redis.createClient
   parser: 'hiredis'
 
 checkIdExistence = (id) ->
-  Q.ninvoke redisConnection, 'get', id
+  Q.ninvoke redisConnection, 'get', "event:#{id}"
   .then (v) ->
     v?
 
 getIdData = (id) ->
-  Q.ninvoke redisConnection, 'get', id
+  Q.ninvoke redisConnection, 'get', "event:#{id}"
   .then JSON.parse
 
 appendIdData = (id, entry) ->
@@ -22,10 +22,10 @@ appendIdData = (id, entry) ->
   .then (data) ->
     data ?= []
     data.push entry
-    redisConnection.set id, JSON.stringify(data)
+    redisConnection.set "event:#{id}", JSON.stringify(data)
 
 getIdLastTimestamp = (id) ->
-  Q.ninvoke redisConnection, 'get', id
+  Q.ninvoke redisConnection, 'get', "event:#{id}"
   .then JSON.parse
   .then (res) ->
     res[res.length - 1].timestamp
