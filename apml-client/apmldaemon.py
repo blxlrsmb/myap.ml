@@ -1,11 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: apmldaemon.py
-# Date: Sat Jun 06 23:50:28 2015 +0800
+# Date: Sun Jun 07 00:39:49 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import platform
-
 from Queue import Empty as EmptyException
 from multiprocessing import Queue
 import time
@@ -59,9 +58,10 @@ class APMLDaemon(object):
             except EmptyException:
                 self.music.zero_speed()
                 t = time.time()
-            last_time = self.packer.start
-            if last_time is not None \
-               and t - last_time > COLLECT_INTERVAL:
+            pack_start = self.packer.start
+            if pack_start is not None \
+               and t - pack_start > COLLECT_INTERVAL:
+                # this sample should start a new pack
                 self.pack()
             if tp is None:
                 continue
@@ -74,8 +74,6 @@ class APMLDaemon(object):
     def pack(self):
         dump = self.packer.dump()
         cnt = self.packer.count()
-
-        assert cnt
         logger.info("Pack a package of {} events".format(cnt))
         self.packer = EventPacker()
         self.logger.add_package(dump)

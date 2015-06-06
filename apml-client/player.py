@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: player.py
-# Date: Sun Jun 07 00:28:19 2015 +0800
+# Date: Sun Jun 07 00:37:28 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -18,8 +18,17 @@ class MusicPlayer(object):
     def __init__(self):
         music_path = config.get('client', 'music')
         music_path = os.path.expanduser(music_path)
+        if not os.path.exists(music_path):
+            logger.warn("No valid music file given.")
+            self.valid = False
+            return
+        logger.info("Load music from {}.".format(music_path))
+        self.valid = True
         self.socket_path = os.path.join('/tmp/', "socket-" + os.path.basename(music_path))
-        cmd = 'mpv "{}" -vo null --input-unix-socket="{}" --loop inf > /tmp/log 2>&1'.format(
+
+        # must redirect stderr to /dev/null or file,
+        # otherwise mpv sometimes stucks, don't know why
+        cmd = 'mpv "{}" -vo null --input-unix-socket="{}" --loop inf 2> /dev/null'.format(
             music_path, self.socket_path)
         self.proc = subprocess.Popen(cmd, shell=True,
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -72,8 +81,9 @@ class SpeedController(object):
             self.update_speed(speed)
 
     def update_speed(self, speed):
+        if not self.player.valid:
+            return
         speed = self.last_speed * self.MOMENTUM + speed * (1 - self.MOMENTUM)
-        print "speed, last:", speed, self.last_speed
         self.last_speed = speed
         if speed < self.SPEED_SILENCE_THRES:
             self.player.set_pause(True)
@@ -86,7 +96,6 @@ class SpeedController(object):
 
 if __name__ == '__main__':
     player = MusicPlayer()
-    import time
     time.sleep(3)
     player.set_speed(0.1)
     time.sleep(3)
