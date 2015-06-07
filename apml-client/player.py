@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: player.py
-# Date: Sun Jun 07 00:37:28 2015 +0800
+# Date: Sun Jun 07 00:57:47 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -13,15 +13,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 from config import config
+from utils.which import which
 
 class MusicPlayer(object):
     def __init__(self):
         music_path = config.get('client', 'music')
         music_path = os.path.expanduser(music_path)
+        self.valid = False
+        if not which('mpv'):
+            logger.warn("mpv is not found. cannot play music.")
+            return
+
         if not os.path.exists(music_path):
             logger.warn("No valid music file given.")
-            self.valid = False
             return
+
         logger.info("Load music from {}.".format(music_path))
         self.valid = True
         self.socket_path = os.path.join('/tmp/', "socket-" + os.path.basename(music_path))
@@ -52,7 +58,8 @@ class MusicPlayer(object):
         self.paused = pause
 
         s = self._create_socket()
-        s.send('{{"command": ["set_property", "pause", {}]}}\r\n'.format('true' if pause else 'false'))
+        s.send('{{"command": ["set_property", "pause", {}]}}\r\n'.format(
+            'true' if pause else 'false'))
 
     def __del__(self):
         self.proc.terminate()

@@ -18,9 +18,9 @@ def set_level_color(lvl, color):
     handler.setFormatter(logging.Formatter(FMT.format(color), '%H:%M:%S'))
     logger.addHandler(handler)
 
-set_level_color(logging.INFO, '\033[1;32m')
-set_level_color(logging.WARN, '\033[1;31m')
-set_level_color(logging.ERROR, '\033[1;31m')
+set_level_color(logging.INFO, '\033[1;32m') # green
+set_level_color(logging.WARN, '\033[1;33m') # yellow
+set_level_color(logging.ERROR, '\033[1;31m') # red
 
 def new_getLogger(n):
     return logger

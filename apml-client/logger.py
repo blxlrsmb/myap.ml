@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: logger.py
-# Date: Sat Jun 06 21:39:13 2015 +0800
+# Date: Sun Jun 07 15:53:06 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -38,7 +38,6 @@ class RemoteSyncing(object):
             r = requests.request('POST', self.url, data=data,
                 headers=self.req_header, timeout=REQUEST_TIMEOUT)
             if r.status_code == 200:
-                logger.info("Successfully sync to server.")
                 return True
         except Exception as e:
             logger.error("Error sync to server: {}".format(e))
