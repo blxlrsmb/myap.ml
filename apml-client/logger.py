@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 # File: logger.py
-# Date: Sun Jun 07 15:53:06 2015 +0800
+# Date: Tue Jun 16 22:45:22 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
 import os
@@ -25,10 +25,17 @@ class RemoteSyncing(object):
         self.baseurl = config.get('server', 'host')
         self.userid = config.get('server', 'userid')
         self.password = config.get('server', 'password')
-        self.url = "http://{}/client/{}".format(self.baseurl, self.userid)
-        logger.info("Use server url: {}".format(self.url))
+        if self.baseurl and self.userid and self.password:
+            self.use_server = True
+            self.url = "http://{}/client/{}".format(self.baseurl, self.userid)
+            logger.info("Use server url: {}".format(self.url))
 
-        self.req_header = {'Content-Type': 'application/json'}
+            self.req_header = {'Content-Type': 'application/json'}
+        else:
+            self.use_server = False
+
+    def available(self):
+        return self.use_server
 
     def send(self, packages):
         data = json.dumps({
@@ -56,6 +63,8 @@ class EventLogger(object):
 
     def try_send(self):
         """ try to send from last_synced_timestamp, until failed"""
+        if not self.sync.available():
+            return
         while True:
             to_send = self.packages[self.last_synced_pkgidx:
                                     self.last_synced_pkgidx + MAX_NR_PACKAGE_SEND]
