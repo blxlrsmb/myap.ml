@@ -31,7 +31,7 @@ class LinuxAPMCollector(APMCollectorBase):
                 key = int(line.strip().split(' ')[-1])
                 # holding a key doesn't count APM
                 if key != self.last_key:
-                    self.on_key()
+                    self.on_key(key)
                 self.last_key = key
 
     def _collect_mouse(self):

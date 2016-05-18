@@ -9,7 +9,7 @@ import time
 
 coll = LinuxAPMCollector([10], [13])
 
-def kb_cb(t, w):
+def kb_cb(t, w, key):
     print 'pressed ', t, w
 def mo_cb(t, w):
     print 'clicked ', t, w
