@@ -4,12 +4,12 @@
 # Date: Sun Jun 07 00:22:01 2015 +0800
 # Author: Yuxin Wu <ppwwyyxxc@gmail.com>
 
-from .base import APMCollectorBase
+from base import APMCollectorBase
 import subprocess
 
 # TODO test device correctness?
 class LinuxAPMCollector(APMCollectorBase):
-    def __init__(self, key_xinput_devices, mouse_xinput_devices):
+    def __init__(self, key_xinput_devices, mouse_xinput_devices, dedup=True):
         """ currently only use one device"""
         # TODO monitor multiple device at the same time
         super(LinuxAPMCollector, self).__init__()
@@ -17,6 +17,7 @@ class LinuxAPMCollector(APMCollectorBase):
         self.mo_device = int(mouse_xinput_devices[0])
 
         self.last_key = None
+        self.dedup = dedup
 
     def _collect_key(self):
         proc = subprocess.Popen(
@@ -30,7 +31,7 @@ class LinuxAPMCollector(APMCollectorBase):
             if line[4] == 'p':  # key press
                 key = int(line.strip().split(' ')[-1])
                 # holding a key doesn't count APM
-                if key != self.last_key:
+                if not self.dedup or key != self.last_key:
                     self.on_key(key)
                 self.last_key = key
 

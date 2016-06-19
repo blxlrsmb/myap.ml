@@ -32,10 +32,10 @@ class APMCollectorBase(object):
         self._keyboard_cb = keyboard_cb
         self._mouse_cb = mouse_cb
 
-    def on_key(self, key):
+    def on_key(self, k):
         t = time.time()
         window = self._get_current_window()
-        self._keyboard_cb(t, window, key)
+        self._keyboard_cb(t, window, k)
 
     def on_mouse(self):
         t = time.time()
